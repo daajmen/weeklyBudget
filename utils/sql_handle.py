@@ -134,3 +134,12 @@ def budget_entry(transaction_entry: Transaction, db_name: str):
     except Exception as e:
         print(f"Ett fel uppstod: {e}, {transaction_entry}")    
 
+def get_transactions(db_name):
+    try:
+        with get_connection(db_name) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f"SELECT date, category, description, amount FROM {db_name};")
+                return cursor.fetchall()
+    except Exception as e:
+        print(f"Ett fel uppstod vid hämtning av transaktioner: {e}")
+        return []
