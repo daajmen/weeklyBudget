@@ -13,7 +13,7 @@ create_table(DB_NAME)
 
 category_list = CategoryList()
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/weekly_budget", methods=["GET", "POST"])
 def index():
     if request.method == "POST":
         t = Transaction()
