@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
+        <h1 class="text-xl font-bold mb-4">Lägg till utgift</h1>
+        <form method="POST">
+            <input type="date" name="date" value="{{ today }}" class="w-full mb-2 p-2 border rounded">
+            <select name="category" class="w-full mb-2 p-2 border rounded">
+            {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+            </select>
+            <input name="description" placeholder="Beskrivning" class="w-full mb-2 p-2 border rounded" required>
+            <div class="relative w-full mb-2">
+                <input type="number" name="amount" step="0.01" class="w-full p-2 pr-10 border rounded" placeholder="Belopp">
+                <span class="absolute right-3 top-2.5 text-gray-500">kr</span>
+            </div>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded">Spara</button>
+        </form>
+    </div>
+</body>
+</html>

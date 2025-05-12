@@ -5,7 +5,7 @@ class Transaction:
         self.date = date.today()  # Default to today's date
         self.category = ''
         self.description = ''
-        self.amount = float
+        self.amount = 0.0
 
 
     def __str__(self):

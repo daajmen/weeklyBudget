@@ -6,10 +6,6 @@ from models.transaction import Transaction
 budget_data = Transaction()
 category_list = CategoryList()
 
-budget_data.amount = 24.56
-budget_data.description = 'Kappahl'
-budget_data.category = category_list.clothes
-
 database = 'monthly_budget'
 
 create_database(database)
