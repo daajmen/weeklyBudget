@@ -15,11 +15,11 @@ class CategoryList:
             'Mat': 13000,
             'Djur': 250,
             'Kläder': 2000,
-            'Nöjen': 500,
+            'Nöjen': 1000,
             'Grejer till hemmet': 1500,
             'Sparande': 2000,
             'Apoteket': 300,
-            'Övrigt': 1000,
+            'Övrigt': 1500,
             'Parkering': 400
         }
 
