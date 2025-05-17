@@ -36,21 +36,36 @@ def index():
     # Skapa en dictionary för att lagra kostnader per kategori
     category_totals = defaultdict(float)
     
-    # Filtrera och summera transaktioner för den aktuella månaden
     filtered_transactions = []
+    category_data = {}
+
     for transaction in transactions:
         if transaction[0].month == current_month and transaction[0].year == current_year:
-            category_totals[transaction[1]] += float(transaction[3])  # Omvandla Decimal till float
-            filtered_transactions.append(transaction)  # Lägg till transaktionen för visning
-            budget_total = sum(category_totals.values())
+            category = transaction[1]
+            amount = float(transaction[3])
+            category_totals[category] += amount
+            filtered_transactions.append(transaction)
 
+    # Bygg upp dict med total, budget och kvar
+    for category in category_totals:
+        spent = round(category_totals[category], 2)
+        budget = category_list.get_budget_for(category)
+        remaining = round(budget - spent, 2)
+        category_data[category] = {
+            "spent": spent,
+            "budget": budget,
+            "remaining": remaining
+        }
 
-    return render_template("index.html", 
-                           categories=category_list.get_all_categories(), 
-                           today=today.isoformat(),
-                           category_totals=category_totals,
-                           transactions=filtered_transactions,
-                           budget_totals=budget_total ) 
+    budget_total = sum(category_totals.values())
+
+    return render_template("index.html",
+                        categories=category_list.get_all_categories(),
+                        today=today.isoformat(),
+                        category_data=category_data,
+                        transactions=filtered_transactions,
+                        budget_totals=budget_total)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)

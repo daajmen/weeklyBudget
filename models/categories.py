@@ -11,5 +11,20 @@ class CategoryList:
         self.parking = 'Parkering'
         self.categories = [self.food, self.animal, self.clothes, self.entertainment, self.house_expenses, self.saving, self.pharmacy, self.other, self.parking]
 
+        self.budgets = {
+            'Mat': 13000,
+            'Djur': 250,
+            'Kläder': 2000,
+            'Nöjen': 500,
+            'Grejer till hemmet': 1500,
+            'Sparande': 2000,
+            'Apoteket': 300,
+            'Övrigt': 1000,
+            'Parkering': 400
+        }
+
     def get_all_categories(self):
         return self.categories
+
+    def get_budget_for(self, category):
+        return self.budgets.get(category, 0)
