@@ -51,6 +51,11 @@
             {% else %}
                 <p class="text-gray-500 text-center">Ingen budgetinformation hittad</p>
             {% endfor %}
+            <tr class="border-t font-semibold">
+                <td class="px-4 py-2">Totalt</td>
+                <td class="px-4 py-2">{{ budget_totals }} kr</td>
+            </tr>
+
         </div>
     </div>
 
