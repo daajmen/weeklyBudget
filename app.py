@@ -42,13 +42,15 @@ def index():
         if transaction[0].month == current_month and transaction[0].year == current_year:
             category_totals[transaction[1]] += float(transaction[3])  # Omvandla Decimal till float
             filtered_transactions.append(transaction)  # Lägg till transaktionen för visning
+            budget_total = sum(category_totals.values())
 
 
     return render_template("index.html", 
                            categories=category_list.get_all_categories(), 
                            today=today.isoformat(),
                            category_totals=category_totals,
-                           transactions=filtered_transactions) 
+                           transactions=filtered_transactions,
+                           budget_totals=budget_total ) 
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
