@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect
 from models.transaction import Transaction
 from models.categories import CategoryList
-from utils.sql_handle import budget_entry, create_database, create_table, get_transactions
+from utils.sql_handle import budget_entry, create_database, create_table, get_transactions, create_budget_table
 from datetime import date
 from collections import defaultdict
 
@@ -10,6 +10,7 @@ DB_NAME = 'monthly_budget'
 
 create_database(DB_NAME)
 create_table(DB_NAME)
+create_budget_table(DB_NAME)
 
 category_list = CategoryList()
 

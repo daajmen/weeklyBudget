@@ -105,6 +105,49 @@ def create_table(db_name):
     except Exception as e:
         print(f"Ett fel uppstod: {e}")
 
+def create_budget_table(db_name):
+    """
+    Creates a table in the specified PostgreSQL database if it does not already exist.
+    The table includes columns for id, date, category, and amount.
+    Table name is predefined as budget_limit
+
+    Parameters:
+        table_name (str): The name of the database where the table will be created.
+
+    Exceptions:
+        Raises an exception if the table creation fails.
+
+    Notes:
+        - Requires a valid connection to the specified database.
+        - The table schema includes:
+            - id: SERIAL PRIMARY KEY
+            - date: DATE NOT NULL
+            - category: TEXT NOT NULL
+            - amount: NUMERIC NOT NULL
+    """   
+
+    table_name = "budget_limit"
+
+    try:
+        with get_connection(db_name) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f'''
+                    CREATE TABLE IF NOT EXISTS {table_name} (
+                        id SERIAL PRIMARY KEY,
+                        date DATE NOT NULL,
+                        category TEXT NOT NULL,
+                        amount NUMERIC NOT NULL
+                    );
+                ''')
+                conn.commit()
+                if cursor.rowcount == -1:  # rowcount is -1 for CREATE TABLE IF NOT EXISTS
+                    print(f"Tabellen {table_name} existerar redan.")
+                else:
+                    print(f"Tabellen {table_name} skapades.")
+    except Exception as e:
+        print(f"Ett fel uppstod: {e}")
+        
+
 def budget_entry(transaction_entry: Transaction, db_name: str):
     """
     Inserts a transaction entry into the database.
@@ -115,13 +158,6 @@ def budget_entry(transaction_entry: Transaction, db_name: str):
     Raises:
         ValueError: If any field in the transaction is invalid.
     """
-    # Validera fälten
-    #if not transaction_entry.date or not transaction_entry.category or not transaction_entry.description:
-    #    raise ValueError("Alla fält i transaktionen måste vara ifyllda.")
-    #if transaction_entry.amount <= 0:
-    #    raise ValueError("Beloppet måste vara större än 0.")
-
-    # Logik för att lägga till transaktionen i databasen
     try:
         with get_connection(db_name) as conn:
             with conn.cursor() as cursor:
