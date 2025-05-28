@@ -9,7 +9,21 @@
 <body class="bg-gray-50 min-h-screen">
     <div class="max-w-4xl mx-auto py-8">
         <h1 class="text-3xl font-bold text-center mb-8 text-blue-700">Min Budgetöversikt</h1>
+        <h2 class="text-lg text-center text-gray-600 mb-8">
+            Budgetperiod: {{ period_start.strftime('%Y-%m-%d') }} – {{ period_end.strftime('%Y-%m-%d') }}
+        </h2>        
         
+        <form method="get" class="mb-8 flex justify-center">
+            <label for="period" class="mr-2 font-medium text-gray-700">Välj period:</label>
+            <select name="period" id="period" class="border rounded px-3 py-2" onchange="this.form.submit()">
+                {% for p in periods %}
+                    {% set pval = p[0].strftime('%Y-%m-%d') ~ '_' ~ p[1].strftime('%Y-%m-%d') %}
+                    <option value="{{ pval }}" {% if period_start == p[0] and period_end == p[1] %}selected{% endif %}>
+                        {{ p[0].strftime('%Y-%m-%d') }} – {{ p[1].strftime('%Y-%m-%d') }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>        
         <!-- Formulär för utgift -->
         <div class="bg-white rounded-lg shadow p-6 mb-8">
             <h2 class="text-xl font-semibold mb-4 text-gray-700">Lägg till utgift</h2>

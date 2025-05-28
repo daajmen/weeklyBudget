@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect
 from models.transaction import Transaction
 from models.categories import CategoryList
+from models.budget_logic import get_budget_period
 from utils.sql_handle import budget_entry, create_database, create_table, get_transactions, create_budget_table, get_current_budget, budget_limit_entry
 from datetime import date
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 app = Flask(__name__)
 DB_NAME = 'monthly_budget'
@@ -42,19 +43,36 @@ def index():
     # Hämta alla transaktioner från databasen
     transactions = get_transactions(DB_NAME)
     budget_rows = get_current_budget(DB_NAME, BUDGET_TABLE)
-
-    # Hämta aktuell månad och år
     today = date.today()
-    current_month = today.month
-    current_year = today.year
 
-    # Bygg en lookup-dict för budget per kategori och månad
+
+    # Hämta alla perioder som finns i budgettabellen
+    periods = set()
+    for row in budget_rows:
+        date_obj = row[0]
+        # Beräkna period_start för varje budgetpost
+        p_start, p_end = get_budget_period(date_obj)
+        periods.add((p_start, p_end))
+    # Sortera perioderna nyast först
+    periods = sorted(periods, reverse=True)
+
+    # Läs in vald period från query-param, annars ta aktuell
+    selected_period = request.args.get("period")
+    if selected_period:
+        # Format: "YYYY-MM-DD_YYYY-MM-DD"
+        start_str, end_str = selected_period.split("_")
+        period_start = date.fromisoformat(start_str)
+        period_end = date.fromisoformat(end_str)
+    else:
+        period_start, period_end = get_budget_period(today)
+
+    # Bygg en lookup-dict för budget per kategori och period
     budget_lookup = {}
     for row in budget_rows:
         date_obj = row[0]
         category = row[1]
         amount = float(row[2])
-        if date_obj.month == current_month and date_obj.year == current_year:
+        if period_start <= date_obj <= period_end:
             budget_lookup[category] = amount
 
     # Skapa en dictionary för att lagra kostnader per kategori
@@ -63,16 +81,18 @@ def index():
     category_data = {}
 
     for transaction in transactions:
-        if transaction[0].month == current_month and transaction[0].year == current_year:
+        t_date = transaction[0]
+        if period_start <= t_date <= period_end:
             category = transaction[1]
             amount = float(transaction[3])
             category_totals[category] += amount
             filtered_transactions.append(transaction)
 
+
     # Bygg upp dict med total, budget och kvar
-    for category in category_totals:
-        spent = round(category_totals[category], 2)
-        budget = budget_lookup.get(category, 0)  # Hämta från databasen, default 0
+    for category in category_list.get_all_categories():
+        spent = round(category_totals.get(category, 0), 2)
+        budget = budget_lookup.get(category, 0)
         remaining = round(budget - spent, 2)
         category_data[category] = {
             "spent": spent,
@@ -81,16 +101,18 @@ def index():
         }
 
     budget_total = sum(category_totals.values())
-
     filtered_transactions.sort(key=lambda t: t[0], reverse=True)
-    
-    return render_template("index.html",
-                        categories=category_list.get_all_categories(),
-                        today=today.isoformat(),
-                        category_data=category_data,
-                        transactions=filtered_transactions,
-                        budget_totals=budget_total)
 
+    return render_template("index.html",
+        categories=category_list.get_all_categories(),
+        today=today.isoformat(),
+        category_data=category_data,
+        transactions=filtered_transactions,
+        budget_totals=round(budget_total, 2),
+        period_start=period_start,
+        period_end=period_end,
+        periods=periods
+)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
