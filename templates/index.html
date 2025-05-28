@@ -1,93 +1,136 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sv">
 <head>
     <meta charset="UTF-8">
-    <title>Budget</title>
+    <title>Budgetöversikt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
-    <div class="max-w-md mx-auto bg-white p-6 rounded shadow">
-        <h1 class="text-xl font-bold mb-4">Lägg till utgift</h1>
-        <form method="POST">
-            <input type="date" name="date" value="{{ today }}" class="w-full mb-2 p-2 border rounded">
-            <select name="category" class="w-full mb-2 p-2 border rounded">
-            {% for cat in categories %}
-                <option value="{{ cat }}">{{ cat }}</option>
-            {% endfor %}
-            </select>
-            <input name="description" placeholder="Beskrivning" class="w-full mb-2 p-2 border rounded" required>
-            <div class="relative w-full mb-2">
-                <input type="number" name="amount" step="0.01" class="w-full p-2 pr-10 border rounded" placeholder="Belopp">
-                <span class="absolute right-3 top-2.5 text-gray-500">kr</span>
-            </div>
-            <button class="bg-blue-500 text-white px-4 py-2 rounded">Spara</button>
-        </form>
-    </div>
+<body class="bg-gray-50 min-h-screen">
+    <div class="max-w-4xl mx-auto py-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-blue-700">Min Budgetöversikt</h1>
+        
+        <!-- Formulär för utgift -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Lägg till utgift</h2>
+            <form method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label for="date" class="block text-sm font-medium text-gray-600 mb-1">Datum</label>
+                    <input type="date" name="date" id="date" value="{{ today }}" class="w-full border rounded px-3 py-2 focus:outline-blue-400" required>
+                </div>
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <select name="category" id="category" class="w-full border rounded px-3 py-2 focus:outline-blue-400" required>
+                        {% for cat in categories %}
+                            <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="description" class="block text-sm font-medium text-gray-600 mb-1">Beskrivning</label>
+                    <input name="description" id="description" placeholder="Beskrivning" class="w-full border rounded px-3 py-2 focus:outline-blue-400" required>
+                </div>
+                <div>
+                    <label for="amount" class="block text-sm font-medium text-gray-600 mb-1">Belopp (kr)</label>
+                    <input type="number" name="amount" id="amount" step="0.01" class="w-full border rounded px-3 py-2 focus:outline-blue-400" placeholder="0.00" required>
+                </div>
+                <div class="md:col-span-4 flex justify-end">
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow transition">Spara utgift</button>
+                </div>
+            </form>
+        </div>
 
-    <!-- Tabell för att visa kostnader per kategori -->
-    <div class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded shadow">
-        <h2 class="text-xl font-bold mb-4">Kostnader per kategori</h2>
-        <div class="space-y-4">
-            {% for category, data in category_data.items() %}
-                {% set used = data.spent %}
-                {% set budget = data.budget %}
-                {% set percent = (used / budget * 100) if budget > 0 else 0 %}
-                <div class="border-b pb-4">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-medium text-gray-800">{{ category }}</span>
-                        <span class="text-sm text-gray-600">
-                            {{ used }} / {{ budget }} kr
-                            {% if used > budget %}
-                                <span class="text-red-600 font-semibold">(över budget)</span>
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-3">
-                        <div class="{% if percent <= 80 %}bg-green-500{% elif percent <= 100 %}bg-yellow-500{% else %}bg-red-500{% endif %} h-3 rounded-full transition-all duration-300"
-                            style="width: {{ [percent, 100]|min }}%;">
+        <!-- Formulär för budget -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Sätt budget</h2>
+            <form method="POST" action="/add_budget" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                <div>
+                    <label for="budget_date" class="block text-sm font-medium text-gray-600 mb-1">Datum</label>
+                    <input type="date" class="w-full border rounded px-3 py-2 focus:outline-blue-400" id="budget_date" name="budget_date" value="{{ today }}" required>
+                </div>
+                <div>
+                    <label for="budget_category" class="block text-sm font-medium text-gray-600 mb-1">Kategori</label>
+                    <select class="w-full border rounded px-3 py-2 focus:outline-blue-400" id="budget_category" name="budget_category" required>
+                        {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label for="budget_amount" class="block text-sm font-medium text-gray-600 mb-1">Budget (kr)</label>
+                    <input type="number" step="0.01" class="w-full border rounded px-3 py-2 focus:outline-blue-400" id="budget_amount" name="budget_amount" required>
+                </div>
+                <div class="md:col-span-4 flex justify-end">
+                    <button type="submit" class="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded shadow transition">Spara budget</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Kostnader per kategori -->
+        <div class="bg-white rounded-lg shadow p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-gray-700">Kostnader per kategori</h2>
+            <div class="space-y-4">
+                {% for category, data in category_data.items() %}
+                    {% set used = data.spent %}
+                    {% set budget = data.budget %}
+                    {% set percent = (used / budget * 100) if budget > 0 else 0 %}
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-medium text-gray-800">{{ category }}</span>
+                            <span class="text-sm text-gray-600">
+                                {{ used }} / {{ budget }} kr
+                                {% if used > budget and budget > 0 %}
+                                    <span class="text-red-600 font-semibold">(över budget)</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3">
+                            <div class="{% if percent <= 80 %}bg-green-500{% elif percent <= 100 %}bg-yellow-500{% else %}bg-red-500{% endif %} h-3 rounded-full transition-all duration-300"
+                                style="width: {{ [percent, 100]|min }}%;">
+                            </div>
                         </div>
                     </div>
-                </div>
-            {% else %}
-                <p class="text-gray-500 text-center">Ingen budgetinformation hittad</p>
-            {% endfor %}
-            <tr class="border-t font-semibold">
-                <td class="px-4 py-2">Totalt</td>
-                <td class="px-4 py-2">{{ budget_totals }} kr</td>
-            </tr>
+                {% else %}
+                    <p class="text-gray-500 text-center">Ingen budgetinformation hittad</p>
+                {% endfor %}
+            </div>
+            <div class="mt-6 text-right font-semibold text-lg">
+                Totalt spenderat: <span class="text-blue-700">{{ budget_totals }} kr</span>
+            </div>
+        </div>
 
+        <!-- Transaktioner -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <details open>
+                <summary class="text-xl font-semibold mb-4 cursor-pointer">Transaktioner denna månad</summary>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto mt-4">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="px-4 py-2 text-left">Datum</th>
+                                <th class="px-4 py-2 text-left">Kategori</th>
+                                <th class="px-4 py-2 text-left">Beskrivning</th>
+                                <th class="px-4 py-2 text-left">Belopp</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactions %}
+                                <tr class="border-t">
+                                    <td class="px-4 py-2">{{ transaction[0] }}</td>
+                                    <td class="px-4 py-2">{{ transaction[1] }}</td>
+                                    <td class="px-4 py-2">{{ transaction[2] }}</td>
+                                    <td class="px-4 py-2">{{ transaction[3] }} kr</td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="px-4 py-2 text-center text-gray-500">Inga transaktioner för denna månad</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
         </div>
     </div>
-
-
-    <details class="max-w-6xl mx-auto mt-6 bg-white p-6 rounded shadow">
-        <summary class="text-xl font-bold mb-4 cursor-pointer">Transaktioner i databasen </summary>
-        <table class="min-w-full table-auto mt-4">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="px-4 py-2 text-left">Datum</th>
-                    <th class="px-4 py-2 text-left">Kategori</th>
-                    <th class="px-4 py-2 text-left">Beskrivning</th>
-                    <th class="px-4 py-2 text-left">Belopp</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for transaction in transactions %}
-                    <tr class="border-t">
-                        <td class="px-4 py-2">{{ transaction[0] }}</td>
-                        <td class="px-4 py-2">{{ transaction[1] }}</td>
-                        <td class="px-4 py-2">{{ transaction[2] }}</td>
-                        <td class="px-4 py-2">{{ transaction[3] }} kr</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="px-4 py-2 text-center text-gray-500">Inga transaktioner för denna månad</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </details>
-
-
 </body>
 </html>

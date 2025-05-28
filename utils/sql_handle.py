@@ -4,6 +4,8 @@ This module provides utility functions for handling PostgreSQL databases and tab
 import psycopg2
 from psycopg2 import sql
 from models.transaction import Transaction
+from models.categories import CategoryList
+from datetime import date
 
 def create_database(db_name):
     """
@@ -105,7 +107,7 @@ def create_table(db_name):
     except Exception as e:
         print(f"Ett fel uppstod: {e}")
 
-def create_budget_table(db_name):
+def create_budget_table(db_name, table_name):
     """
     Creates a table in the specified PostgreSQL database if it does not already exist.
     The table includes columns for id, date, category, and amount.
@@ -125,9 +127,6 @@ def create_budget_table(db_name):
             - category: TEXT NOT NULL
             - amount: NUMERIC NOT NULL
     """   
-
-    table_name = "budget_limit"
-
     try:
         with get_connection(db_name) as conn:
             with conn.cursor() as cursor:
@@ -179,3 +178,39 @@ def get_transactions(db_name):
     except Exception as e:
         print(f"Ett fel uppstod vid hämtning av transaktioner: {e}")
         return []
+    
+def get_current_budget(db_name, table_name): 
+    try:
+        with get_connection(db_name) as conn: 
+            with conn.cursor() as cursor: 
+                cursor.execute(f"SELECT date, category, amount FROM {table_name};")
+                return cursor.fetchall()
+    except Exception as e: 
+        print(f'Något gick fel {e}')
+        return []
+    
+def budget_limit_entry(db_name: str, table_name: str, date_entry: date, catergory: str, amount: float):
+    """
+    Inserts a budget limit for the month 
+    
+    Parameters: 
+        db_name: Database name
+        table_name: Name of the table that keeps the budget limit
+        date_entry: The date of the budget
+        catergory_object: A category list that will be sent into the DB
+
+    Raises
+
+    """
+
+    try:
+        with get_connection(db_name) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(f'''
+                    INSERT INTO {table_name} (date, category, amount)
+                    VALUES (%s, %s, %s)
+                ''', (date_entry, catergory, amount))
+                conn.commit()
+                print("Budgeten har uppdaterats.")
+    except Exception as e:
+        print(f"Ett fel uppstod: {e}, {catergory}")    
