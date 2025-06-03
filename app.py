@@ -100,7 +100,11 @@ def index():
             "remaining": remaining
         }
 
-    budget_total = sum(category_totals.values())
+    # Totalt spenderat
+    total_spent = sum([inner_dict['spent'] for inner_dict in category_data.values()])
+    # Total budget
+    total_budget = sum([inner_dict['budget'] for inner_dict in category_data.values()])
+
     filtered_transactions.sort(key=lambda t: t[0], reverse=True)
 
     return render_template("index.html",
@@ -108,7 +112,8 @@ def index():
         today=today.isoformat(),
         category_data=category_data,
         transactions=filtered_transactions,
-        budget_totals=round(budget_total, 2),
+        total_spent=round(total_spent, 2),
+        total_budget=round(total_budget, 2),
         period_start=period_start,
         period_end=period_end,
         periods=periods
